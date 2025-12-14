@@ -62,8 +62,6 @@ check-web:
 	cargo check \
 	  --config 'profile.web.inherits="dev"' \
 	  --profile ci \
-	  --no-default-features \
-	  --features dev \
 	  --target {{WASM_TARGET}}
 
 # Run everything in CI order
