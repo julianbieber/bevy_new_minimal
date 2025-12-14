@@ -7,5 +7,5 @@ components = [
   "rust-src",
   "rust-docs"
 ]
-# Optional: keep default profile so optional components can be added automatically
-# profile = "default"
+
+targets = ["wasm32-unknown-unknown", "x86_64-unknown-linux-gnu"]
