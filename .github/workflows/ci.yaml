@@ -10,8 +10,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true
 
-env:
-
 jobs:
   # Check formatting.
   format:
