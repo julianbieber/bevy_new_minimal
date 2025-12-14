@@ -23,7 +23,7 @@ jobs:
       - uses: extractions/setup-just@v3
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@master
+        uses: actions-rust-lang/setup-rust-toolchain@v1
 
       - name: Check formatting
         run: just fmt
@@ -40,7 +40,7 @@ jobs:
       - uses: extractions/setup-just@v3
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@master
+        uses: actions-rust-lang/setup-rust-toolchain@v1
 
       - name: Restore Rust cache
         id: cache
@@ -68,7 +68,7 @@ jobs:
       - uses: extractions/setup-just@v3
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@master
+        uses: actions-rust-lang/setup-rust-toolchain@v1
 
       - name: Restore Rust cache
         id: cache
@@ -127,7 +127,7 @@ jobs:
       - uses: extractions/setup-just@v3
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@master
+        uses: actions-rust-lang/setup-rust-toolchain@v1
 
       - name: Restore Rust cache
         uses: Swatinem/rust-cache@v2
@@ -154,7 +154,7 @@ jobs:
       - uses: extractions/setup-just@v3
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@master
+        uses: actions-rust-lang/setup-rust-toolchain@v1
 
       - name: Restore Rust cache
         id: cache
