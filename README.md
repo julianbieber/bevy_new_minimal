@@ -6,13 +6,7 @@ A minimal template for use when generating new Bevy projects.
 
 Using the [Bevy CLI](https://github.com/thebevyflock/bevy_cli) (currently under development):
 ```shell
-bevy new projectname
-```
-
-Using [`cargo generate`](https://cargo-generate.github.io/cargo-generate/):
-```shell
-cargo install cargo-generate
-cargo generate thebevyflock/bevy_new_minimal
+bevy new projectname -t julianbieber/bevy_new_minimal
 ```
 
 ## License
