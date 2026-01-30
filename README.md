@@ -18,3 +18,10 @@ The source code in this repository is licensed under any of the following at you
 - [Apache License, Version 2.0](./LICENSE-Apache-2.0.txt)
 
 The CC0 license explicitly does not waive patent rights, but we confirm that we hold no patent rights to anything presented in this repository.
+
+# TODO before the jam
+
+* tooltip system
+* gdd tempalte
+* notes setup
+* post in discord
