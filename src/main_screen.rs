@@ -16,6 +16,7 @@ use bevy::{
     picking::hover::Hovered,
     prelude::*,
     ui_widgets::{Activate, observe},
+    window::PrimaryWindow,
 };
 
 use crate::screens::Screen;
@@ -178,6 +179,7 @@ fn spawn_tooltip(
         .with_children(|v| {
             for word in words {
                 if let Some(tooltip) = known_tooltips.get(word) {
+                    let t = tooltip.text.clone();
                     v.spawn((
                         clickable_text(
                             ButtonProps::default(),
@@ -187,7 +189,23 @@ fn spawn_tooltip(
                                 TextColor(Color::oklcha(0.62, 0.5, 385.0, 1.0)),
                             )),
                         ),
-                        observe(|_: On<Activate>| info!("tooltip clicked")),
+                        observe(
+                            move |_: On<Activate>,
+                                  commands: Commands,
+                                  known: Res<TooltipMap>,
+                                  mut stack: ResMut<TooltipStack>,
+                                  window: Single<&Window, With<PrimaryWindow>>| {
+                                if let Some(mouse) =window.cursor_position() {
+                                    spawn_tooltip(
+                                        commands,
+                                        &known.tooltips,
+                                        &mut stack.entities,
+                                        &t,
+                                        (px(mouse.x), px(mouse.y)),
+                                    );
+                                }
+                            },
+                        ),
                     ));
                 } else {
                     v.spawn(Text::new(word));
@@ -229,9 +247,18 @@ pub fn clickable_text<C: SpawnableList<ChildOf> + Send + Sync + 'static, B: Bund
     )
 }
 
-fn handle_escape_help(keys: Res<ButtonInput<KeyCode>>, mut next: ResMut<NextState<Screen>>) {
+fn handle_escape_help(
+    keys: Res<ButtonInput<KeyCode>>,
+    mut next: ResMut<NextState<Screen>>,
+    mut commands: Commands,
+    mut stack: ResMut<TooltipStack>,
+) {
     if keys.just_pressed(KeyCode::Escape) {
-        next.set(Screen::Main);
+        if let Some(last) = stack.entities.pop() {
+            commands.entity(last).despawn();
+        } else {
+            next.set(Screen::Main);
+        }
     }
 }
 
