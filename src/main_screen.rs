@@ -13,7 +13,6 @@ use bevy::{
         tokens,
     },
     input_focus::tab_navigation::TabIndex,
-    picking::hover::Hovered,
     prelude::*,
     ui_widgets::{Activate, observe},
     window::PrimaryWindow,
@@ -136,7 +135,7 @@ fn setup_help(
         commands,
         &known_toolips.tooltips,
         &mut stack.entities,
-        "Some text containing clickable words",
+        "Some text containing clickable words, and non clickable words\n and a line break",
         (px(0), px(100)),
     );
 }
@@ -165,28 +164,50 @@ fn spawn_tooltip(
     text: &str,
     at: (Val, Val),
 ) {
-    let words = text.split(" ");
+    let delimiters = [' ', '.', '\n', ','];
+    let word_indices = text.match_indices(&delimiters);
     let entity = commands
         .spawn((
             Node {
-                position_type: PositionType::Absolute,
-                left: at.0,
-                top: at.1,
+                max_width: px(400),
+                flex_direction: FlexDirection::Row,
                 ..Default::default()
             },
             ZIndex(stack.len() as i32 + 1),
         ))
-        .with_children(|v| {
-            for word in words {
-                if let Some(tooltip) = known_tooltips.get(word) {
-                    let t = tooltip.text.clone();
-                    v.spawn((
+        .with_children(|c| {
+            c.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: at.0,
+                    top: at.1,
+                    max_width: px(400),
+                    // max_height: px(1000),
+                    flex_wrap: FlexWrap::Wrap,
+                    align_items: AlignItems::FlexStart,
+                    // overflow: Overflow::scroll_y(),
+                    flex_direction: FlexDirection::Row,
+                    flex_shrink: 0.0,
+                    ..Default::default()
+                },
+                ZIndex(stack.len() as i32 + 1),
+                ThemeBackgroundColor(TOOLTIP_CLICKABLE_BG),
+            ))
+            .with_children(|v| {
+                let mut start = 0;
+                for (i, delimiter) in word_indices {
+                    let word = &text[start..i];
+                    dbg!(word, start, i, delimiter);
+                    if let Some(tooltip) = known_tooltips.get(word) {
+                        let t = tooltip.text.clone();
+                        v.spawn((
                         clickable_text(
                             ButtonProps::default(),
                             (),
                             Spawn((
                                 Text::new(tooltip.name.as_str()),
-                                TextColor(Color::oklcha(0.62, 0.5, 385.0, 1.0)),
+                                TextFont::from_font_size(7.0),
+                                TextColor(Color::oklcha(0.92, -0.5, 385.0, 1.0)),
                             )),
                         ),
                         observe(
@@ -207,10 +228,16 @@ fn spawn_tooltip(
                             },
                         ),
                     ));
-                } else {
-                    v.spawn(Text::new(word));
+                    } else {
+                        v.spawn(Text::new(word));
+                    }
+                    v.spawn(Text::new(delimiter));
+                    start = i + delimiter.len();
                 }
-            }
+                if start < text.len() {
+                    v.spawn(Text::new(&text[start..text.len()]));
+                }
+            });
         })
         .id();
     stack.push(entity);
@@ -236,7 +263,6 @@ pub fn clickable_text<C: SpawnableList<ChildOf> + Send + Sync + 'static, B: Bund
         // Hovered::default(),
         EntityCursor::System(bevy::window::SystemCursorIcon::Help),
         TabIndex(0),
-        ThemeBackgroundColor(TOOLTIP_CLICKABLE_BG),
         ThemeFontColor(TOOLTIP_CLICKABLE_TEXT),
         InheritableFont {
             font: HandleOrPath::Path(fonts::REGULAR.to_owned()),
