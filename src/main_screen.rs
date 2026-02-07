@@ -3,13 +3,13 @@ use std::collections::HashMap;
 use bevy::{
     ecs::spawn::SpawnableList,
     feathers::{
-        constants::{fonts, size},
+        constants::fonts,
         controls::{ButtonProps, button},
         cursor::EntityCursor,
         dark_theme::create_dark_theme,
         font_styles::InheritableFont,
         handle_or_path::HandleOrPath,
-        theme::{ThemeBackgroundColor, ThemeFontColor, ThemeToken, UiTheme},
+        theme::{ThemeBackgroundColor, ThemeBorderColor, ThemeFontColor, ThemeToken, UiTheme},
         tokens,
     },
     input_focus::tab_navigation::TabIndex,
@@ -30,6 +30,9 @@ impl Plugin for MainScreenPlugin {
         theme
             .color
             .insert(TOOLTIP_CLICKABLE_TEXT, Color::oklcha(0.62, 0.5, 385.0, 1.0));
+        theme
+            .color
+            .insert(TOOLTIP_BORDER, Color::oklcha(0.62, -0.5, 185.0, 1.0));
         let mut tooltips = HashMap::new();
         tooltips.insert(
             "Some".to_string(),
@@ -41,14 +44,14 @@ impl Plugin for MainScreenPlugin {
         tooltips.insert(
             "text".to_string(),
             Tooltip {
-                text: "Some text".to_string(),
+                text: "Some text clickable".to_string(),
                 name: "text".to_string(),
             },
         );
         tooltips.insert(
             "clickable".to_string(),
             Tooltip {
-                text: "Some text containing".to_string(),
+                text: "Some text containing a line break\n\ncontinue".to_string(),
                 name: "clickable".to_string(),
             },
         );
@@ -135,8 +138,9 @@ fn setup_help(
         commands,
         &known_toolips.tooltips,
         &mut stack.entities,
-        "Some text containing clickable words, and non clickable words\n and a line break",
-        (px(0), px(100)),
+        "Some text containing clickable words, and non clickable words\nand a line break",
+        (px(0), px(0)),
+        false,
     );
 }
 
@@ -156,6 +160,7 @@ struct Tooltip {
 }
 pub const TOOLTIP_CLICKABLE_BG: ThemeToken = ThemeToken::new_static("tooltip.clickable.bg");
 pub const TOOLTIP_CLICKABLE_TEXT: ThemeToken = ThemeToken::new_static("tooltip.clickable.text");
+pub const TOOLTIP_BORDER: ThemeToken = ThemeToken::new_static("tooltip.border");
 
 fn spawn_tooltip(
     mut commands: Commands,
@@ -163,50 +168,45 @@ fn spawn_tooltip(
     stack: &mut Vec<Entity>,
     text: &str,
     at: (Val, Val),
+    closable: bool,
 ) {
-    let delimiters = [' ', '.', '\n', ','];
-    let word_indices = text.match_indices(&delimiters);
+    let font_size = 9.0;
     let entity = commands
         .spawn((
             Node {
-                max_width: px(400),
-                flex_direction: FlexDirection::Row,
+                position_type: PositionType::Absolute,
+                left: at.0,
+                top: at.1,
+                align_items: AlignItems::FlexStart,
+                flex_direction: FlexDirection::Column,
+                flex_shrink: 0.0,
+                border: UiRect::all(Val::Px(3.0)),
                 ..Default::default()
             },
             ZIndex(stack.len() as i32 + 1),
+            ThemeBackgroundColor(TOOLTIP_CLICKABLE_BG),
+            ThemeBorderColor(TOOLTIP_BORDER),
         ))
-        .with_children(|c| {
-            c.spawn((
-                Node {
-                    position_type: PositionType::Absolute,
-                    left: at.0,
-                    top: at.1,
-                    max_width: px(400),
-                    // max_height: px(1000),
-                    flex_wrap: FlexWrap::Wrap,
-                    align_items: AlignItems::FlexStart,
-                    // overflow: Overflow::scroll_y(),
-                    flex_direction: FlexDirection::Row,
-                    flex_shrink: 0.0,
+        .with_children(|v| {
+            for line in text.split('\n') {
+                v.spawn(Node {
                     ..Default::default()
-                },
-                ZIndex(stack.len() as i32 + 1),
-                ThemeBackgroundColor(TOOLTIP_CLICKABLE_BG),
-            ))
-            .with_children(|v| {
-                let mut start = 0;
-                for (i, delimiter) in word_indices {
-                    let word = &text[start..i];
-                    dbg!(word, start, i, delimiter);
-                    if let Some(tooltip) = known_tooltips.get(word) {
-                        let t = tooltip.text.clone();
-                        v.spawn((
+                })
+                .with_children(|row| {
+                    let delimiters = [' ', '.', ','];
+                    let word_indices = line.match_indices(delimiters);
+                    let mut start = 0;
+                    for (i, delimiter) in word_indices {
+                        let word = &line[start..i];
+                        if let Some(tooltip) = known_tooltips.get(word) {
+                            let t = tooltip.text.clone();
+                            row.spawn((
                         clickable_text(
                             ButtonProps::default(),
                             (),
                             Spawn((
                                 Text::new(tooltip.name.as_str()),
-                                TextFont::from_font_size(7.0),
+                                TextFont::from_font_size(font_size),
                                 TextColor(Color::oklcha(0.92, -0.5, 385.0, 1.0)),
                             )),
                         ),
@@ -223,24 +223,31 @@ fn spawn_tooltip(
                                         &mut stack.entities,
                                         &t,
                                         (px(mouse.x), px(mouse.y)),
+                                        true
                                     );
                                 }
                             },
                         ),
                     ));
-                    } else {
-                        v.spawn(Text::new(word));
+                        } else {
+                            row.spawn((Text::new(word), TextFont::from_font_size(font_size)));
+                        }
+                        row.spawn((Text::new(delimiter), TextFont::from_font_size(font_size)));
+                        start = i + delimiter.len();
                     }
-                    v.spawn(Text::new(delimiter));
-                    start = i + delimiter.len();
-                }
-                if start < text.len() {
-                    v.spawn(Text::new(&text[start..text.len()]));
-                }
-            });
+                    if start < text.len() {
+                        row.spawn((
+                            Text::new(&line[start..line.len()]),
+                            TextFont::from_font_size(font_size),
+                        ));
+                    }
+                });
+            }
         })
         .id();
-    stack.push(entity);
+    if closable {
+        stack.push(entity);
+    }
 }
 
 pub fn clickable_text<C: SpawnableList<ChildOf> + Send + Sync + 'static, B: Bundle>(
@@ -250,17 +257,10 @@ pub fn clickable_text<C: SpawnableList<ChildOf> + Send + Sync + 'static, B: Bund
 ) -> impl Bundle {
     (
         Node {
-            height: size::ROW_HEIGHT,
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
-            padding: UiRect::axes(Val::Px(8.0), Val::Px(0.)),
-            flex_grow: 1.0,
-            border_radius: props.corners.to_border_radius(4.0),
             ..Default::default()
         },
         bevy::ui_widgets::Button,
         props.variant,
-        // Hovered::default(),
         EntityCursor::System(bevy::window::SystemCursorIcon::Help),
         TabIndex(0),
         ThemeFontColor(TOOLTIP_CLICKABLE_TEXT),
