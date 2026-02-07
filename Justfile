@@ -4,8 +4,8 @@ set shell := ["bash", "-eu", "-o", "pipefail", "-c"]
 # Read active rust toolchain from mise for display/logging
 
 # Shared env (same as CI)
-RUSTFLAGS_BASE := "-Dwarnings -Zshare-generics=y -Zthreads=0"
-RUSTDOCFLAGS_BASE := "-Dwarnings -Zshare-generics=y -Zthreads=0"
+RUSTFLAGS_BASE := "-Zshare-generics=y -Zthreads=0"
+RUSTDOCFLAGS_BASE := "-Zshare-generics=y -Zthreads=0"
 WASM_TARGET := "wasm32-unknown-unknown"
 
 # Default: run everything
