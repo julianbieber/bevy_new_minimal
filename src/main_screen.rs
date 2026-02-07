@@ -8,7 +8,10 @@ use bevy::{
     ui_widgets::{Activate, observe},
 };
 
-use crate::{screens::Screen, tooltip::{TooltipPlugin, *}};
+use crate::{
+    screens::Screen,
+    tooltip::{TooltipPlugin, *},
+};
 pub struct MainScreenPlugin;
 
 impl Plugin for MainScreenPlugin {

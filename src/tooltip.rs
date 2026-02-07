@@ -54,7 +54,7 @@ impl Plugin for TooltipPlugin {
         theme
             .color
             .insert(TOOLTIP_BORDER, Color::oklcha(0.62, -0.5, 185.0, 1.0));
-        
+
         let mut tooltips = HashMap::new();
         tooltips.insert(
             "Some".to_string(),
@@ -77,13 +77,13 @@ impl Plugin for TooltipPlugin {
                 name: "clickable".to_string(),
             },
         );
-        
+
         app.insert_resource(UiTheme(theme));
         app.insert_resource(TooltipMap { tooltips });
         app.insert_resource(TooltipStack {
             entities: Vec::new(),
         });
-        
+
         app.add_systems(Update, handle_escape_help.run_if(in_state(Screen::Help)));
     }
 }
