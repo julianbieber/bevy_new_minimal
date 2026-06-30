@@ -1,12 +1,12 @@
 use bevy::{
     feathers::{
-        controls::{FeathersButton, FeathersButtonProps},
+        controls::FeathersButton,
         theme::{ThemeBackgroundColor, ThemedText},
         tokens,
     },
     input_focus::AutoFocus,
     prelude::*,
-    ui_widgets::{Activate, observe},
+    ui_widgets::Activate,
 };
 
 use crate::{
