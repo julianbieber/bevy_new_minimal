@@ -6,12 +6,12 @@ use bevy::{
     feathers::{
         constants::fonts,
         controls::FeathersButtonProps,
-        cursor::EntityCursor,
         dark_theme::create_dark_theme,
         font_styles::InheritableFont,
-        theme::{ThemeBackgroundColor, ThemeBorderColor, ThemeToken, UiTheme},
+        theme::{SemanticToken, ThemeBackgroundColor, ThemeBorderColor, ThemeToken, UiTheme},
     },
     input_focus::tab_navigation::TabIndex,
+    picking::cursor::EntityCursor,
     prelude::*,
     ui_widgets::{Activate, observe},
     window::PrimaryWindow,
@@ -44,15 +44,29 @@ pub struct TooltipPlugin;
 impl Plugin for TooltipPlugin {
     fn build(&self, app: &mut App) {
         let mut theme = create_dark_theme();
+        theme.token_assignments.insert(
+            TOOLTIP_CLICKABLE_BG,
+            SemanticToken::new_static("tooltip.clickable.bg"),
+        );
+        theme.semantic_base.insert(
+            SemanticToken::new_static("tooltip.clickable.bg"),
+            Color::oklcha(0.02, 0.4, 385.0, 1.0),
+        );
+        theme.token_assignments.insert(
+            TOOLTIP_CLICKABLE_TEXT,
+            SemanticToken::new_static("tooltip.clickable.text"),
+        );
+        theme.semantic_base.insert(
+            SemanticToken::new_static("tooltip.clickable.text"),
+            Color::oklcha(0.62, 0.5, 385.0, 1.0),
+        );
         theme
-            .color
-            .insert(TOOLTIP_CLICKABLE_BG, Color::oklcha(0.02, 0.4, 385.0, 1.0));
-        theme
-            .color
-            .insert(TOOLTIP_CLICKABLE_TEXT, Color::oklcha(0.62, 0.5, 385.0, 1.0));
-        theme
-            .color
-            .insert(TOOLTIP_BORDER, Color::oklcha(0.62, -0.5, 185.0, 1.0));
+            .token_assignments
+            .insert(TOOLTIP_BORDER, SemanticToken::new_static("tooltip.border"));
+        theme.semantic_base.insert(
+            SemanticToken::new_static("tooltip.border"),
+            Color::oklcha(0.62, -0.5, 185.0, 1.0),
+        );
 
         let mut tooltips = HashMap::new();
         tooltips.insert(
