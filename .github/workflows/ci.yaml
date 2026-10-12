@@ -97,9 +97,8 @@ jobs:
       - uses: extractions/setup-just@v3
 
       - name: Install Rust toolchain (plus bevy_lint)
-        uses: TheBevyFlock/bevy_cli/bevy_lint@lint-v0.6.0
+        uses: TheBevyFlock/bevy_cli/bevy_lint@df790973d6df86d4b8e041eda1043ff90138b01f
         with:
-          toolchain: nightly-2026-04-16
           cache: true
           save-cache-if: ${{ github.ref == 'refs/heads/main' }}
 

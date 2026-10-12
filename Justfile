@@ -38,12 +38,12 @@ clippy:
 	RUSTDOCFLAGS="{{RUSTDOCFLAGS_BASE}}" \
 	cargo clippy --locked --workspace --all-targets --profile ci --all-features
 
-# Bevy lints (requires bevy_lint on PATH)
+# Bevy lints (needs bevy_lint on PATH; its pinned nightly predates the rust-version bevy 0.20 declares, so that gate is skipped)
 bevy-lints:
 	@env \
 	RUSTFLAGS="{{RUSTFLAGS_BASE}}" \
 	RUSTDOCFLAGS="{{RUSTDOCFLAGS_BASE}}" \
-	bevy_lint --locked --workspace --all-targets --profile ci --all-features
+	bevy_lint --locked --workspace --all-targets --profile ci --all-features --ignore-rust-version
 
 # Install Bevy linter via the Bevy CLI installer, then ensure bevy_lint exists
 bevy-lint-install:
